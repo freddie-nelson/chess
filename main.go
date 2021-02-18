@@ -1,24 +1,29 @@
 package main
 
 import (
-	// tl "github.com/JoelOtter/termloop"
 	"github.com/containerd/console"
 )
 
+// Size is the width and height of the board
+const Size int = 8
+
+// TermSize is the number of columns and rows the board occupies in the terminal
+const TermSize int = 32
+
 func main() {
+	// TermSize = getTermSize()
+
+	board := SetupInitialBoard()
+	Draw(board)
+}
+
+func getTermSize() int {
 	current := console.Current()
 
 	ws, err := current.Size()
 	if err != nil {
-		return
+		return 10
 	}
 
-	ws.Height = 100
-	ws.Width = 100
-	current.Resize(ws)
-
-	// screen := game.Screen()
-	// screen.SetFps(30)
-
-	// game.Start()
+	return int(ws.Height)
 }
