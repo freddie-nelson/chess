@@ -7,9 +7,6 @@ import (
 // Size is the width and height of the board
 const Size int = 8
 
-// TermSize is the number of columns and rows the board occupies in the terminal
-const TermSize int = 32
-
 func main() {
 	// TermSize = getTermSize()
 
