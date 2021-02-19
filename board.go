@@ -43,8 +43,8 @@ func placePawnRank(board *[Size][Size]Spot, rank int, color int) {
 	}
 }
 
-// Draw draws the current board to the terminal
-func Draw(board *[Size][Size]Spot) {
+// BoardToString returns the board's current state as a single string
+func BoardToString(board *[Size][Size]Spot) string {
 	output := ""
 
 	resetColor := "\033[0m"
@@ -102,11 +102,10 @@ func Draw(board *[Size][Size]Spot) {
 		}
 
 		for i := 0; i < len(lines); i++ {
-			lines[i] += "\n"
+			lines[i] = "\r" + lines[i] + "\n"
+			output += lines[i]
 		}
-
-		output += strings.Join(lines[:], "")
 	}
 
-	fmt.Print(output)
+	return output
 }

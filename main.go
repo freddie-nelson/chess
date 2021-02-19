@@ -1,26 +1,26 @@
 package main
 
 import (
-	"github.com/containerd/console"
+	tl "github.com/JoelOtter/termloop"
 )
 
 // Size is the width and height of the board
 const Size int = 8
 
+// GameState global game state
+var GameState Game
+
 func main() {
-	// TermSize = getTermSize()
+	game := tl.NewGame()
+	screen := game.Screen()
 
 	board := SetupInitialBoard()
-	Draw(board)
-}
+	GameState.board = board
 
-func getTermSize() int {
-	current := console.Current()
+	boardLevel := SetupBoardLevel()
+	screen.SetLevel(boardLevel)
 
-	ws, err := current.Size()
-	if err != nil {
-		return 10
-	}
+	screen.SetFps(24)
 
-	return int(ws.Height)
+	game.Start()
 }
