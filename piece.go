@@ -84,6 +84,10 @@ func calculateMovesFromOffsets(board *[Size][Size]Spot, validMoves *[Size][Size]
 				spot := &board[currentFile][currentRank]
 				if spot.containsPiece {
 					if spot.piece.color == Black {
+						if spot.piece.class == King {
+							return
+						}
+
 						spot.highlighted = true
 						validMoves[currentFile][currentRank] = true
 					}
