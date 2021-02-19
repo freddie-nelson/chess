@@ -38,3 +38,21 @@ func (g *Game) ChangeSelectedSpot(fileOff int, rankOff int) {
 
 	g.SetSelectedSpot(file, rank)
 }
+
+// PickSpot picks the current selected spot
+func (g *Game) PickSpot() {
+	// prevent player from picking spots that don't contain a piece
+	// or don't belong to them
+	if !g.selectedSpot.containsPiece {
+		return
+	} else if g.selectedSpot.piece.color == Black {
+		return
+	}
+
+	if g.pickedSpot != nil {
+		g.pickedSpot.picked = false
+	}
+
+	g.pickedSpot = g.selectedSpot
+	g.pickedSpot.picked = true
+}

@@ -7,4 +7,5 @@ type Spot struct {
 	file          int
 	rank          int
 	selected      bool
+	picked        bool
 }

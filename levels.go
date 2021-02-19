@@ -30,6 +30,8 @@ func (b *BoardEntity) Tick(e tl.Event) {
 			GameState.ChangeSelectedSpot(0, -1)
 		case tl.KeyArrowDown:
 			GameState.ChangeSelectedSpot(0, 1)
+		case tl.KeyEnter:
+			GameState.PickSpot()
 		}
 	}
 }

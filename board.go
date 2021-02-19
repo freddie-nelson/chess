@@ -30,19 +30,19 @@ func SetupInitialBoard() *[Size][Size]Spot {
 }
 
 func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
-	board[0][rank] = Spot{&Piece{color, Rook}, true, 0, rank, false}
-	board[1][rank] = Spot{&Piece{color, Knight}, true, 1, rank, false}
-	board[2][rank] = Spot{&Piece{color, Bishop}, true, 2, rank, false}
-	board[3][rank] = Spot{&Piece{color, Queen}, true, 3, rank, false}
-	board[4][rank] = Spot{&Piece{color, King}, true, 4, rank, false}
-	board[5][rank] = Spot{&Piece{color, Bishop}, true, 5, rank, false}
-	board[6][rank] = Spot{&Piece{color, Knight}, true, 6, rank, false}
-	board[7][rank] = Spot{&Piece{color, Rook}, true, 7, rank, false}
+	board[0][rank] = Spot{&Piece{color, Rook}, true, 0, rank, false, false}
+	board[1][rank] = Spot{&Piece{color, Knight}, true, 1, rank, false, false}
+	board[2][rank] = Spot{&Piece{color, Bishop}, true, 2, rank, false, false}
+	board[3][rank] = Spot{&Piece{color, Queen}, true, 3, rank, false, false}
+	board[4][rank] = Spot{&Piece{color, King}, true, 4, rank, false, false}
+	board[5][rank] = Spot{&Piece{color, Bishop}, true, 5, rank, false, false}
+	board[6][rank] = Spot{&Piece{color, Knight}, true, 6, rank, false, false}
+	board[7][rank] = Spot{&Piece{color, Rook}, true, 7, rank, false, false}
 }
 
 func placePawnRank(board *[Size][Size]Spot, rank int, color int) {
 	for file := 0; file < Size; file++ {
-		board[file][rank] = Spot{&Piece{color, Pawn}, true, file, rank, false}
+		board[file][rank] = Spot{&Piece{color, Pawn}, true, file, rank, false, false}
 	}
 }
 
@@ -56,6 +56,7 @@ func BoardToString(board *[Size][Size]Spot) string {
 	darkSquareColor := "\033[100m"
 	lightSquareColor := "\033[47m"
 	selectedSquareColor := "\033[41m"
+	pickedSquareColor := "\033[42m"
 
 	// piece colors
 	blackPieceColor := "\033[30m"
@@ -77,7 +78,10 @@ func BoardToString(board *[Size][Size]Spot) string {
 				bgColor = lightSquareColor
 			}
 
-			if board[file][rank].selected {
+			spot := board[file][rank]
+			if spot.picked {
+				bgColor = pickedSquareColor
+			} else if spot.selected {
 				bgColor = selectedSquareColor
 			}
 
@@ -86,8 +90,6 @@ func BoardToString(board *[Size][Size]Spot) string {
 			for i := 0; i < len(lines); i++ {
 				if i == pieceLine {
 					margin := bgColor + strings.Repeat(gapChar, spotSize/2)
-
-					spot := board[file][rank]
 					spotStr := " "
 
 					if spot.containsPiece {
@@ -117,7 +119,7 @@ func BoardToString(board *[Size][Size]Spot) string {
 		}
 
 		for i := 0; i < len(lines); i++ {
-			lines[i] = "\r" + lines[i] + "\n"
+			lines[i] = lines[i] + "\n"
 			output += lines[i]
 		}
 	}
