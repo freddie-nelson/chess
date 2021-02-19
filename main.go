@@ -14,8 +14,9 @@ func main() {
 	game := tl.NewGame()
 	screen := game.Screen()
 
-	board := SetupInitialBoard()
-	GameState.board = board
+	board := Board{}
+	board.Setup()
+	GameState.board = &board
 
 	boardLevel := SetupBoardLevel()
 	screen.SetLevel(boardLevel)

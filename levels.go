@@ -14,24 +14,26 @@ type BoardEntity struct {
 
 // Draw draws the boards current state to the console
 func (b *BoardEntity) Draw(s *tl.Screen) {
-	output := BoardToString(GameState.board)
+	output := GameState.board.ToString()
 	fmt.Printf("\033[0;0H%s%v", output, time.Now())
 }
 
 // Tick reacts to changes in the game's state every tick
 func (b *BoardEntity) Tick(e tl.Event) {
+	board := GameState.board
+
 	if e.Type == tl.EventKey {
 		switch e.Key {
 		case tl.KeyArrowRight:
-			GameState.ChangeSelectedSpot(1, 0)
+			board.ChangeSelectedSpot(1, 0)
 		case tl.KeyArrowLeft:
-			GameState.ChangeSelectedSpot(-1, 0)
+			board.ChangeSelectedSpot(-1, 0)
 		case tl.KeyArrowUp:
-			GameState.ChangeSelectedSpot(0, -1)
+			board.ChangeSelectedSpot(0, -1)
 		case tl.KeyArrowDown:
-			GameState.ChangeSelectedSpot(0, 1)
+			board.ChangeSelectedSpot(0, 1)
 		case tl.KeyEnter:
-			GameState.PickSpot()
+			board.PickSpot()
 		}
 	}
 }

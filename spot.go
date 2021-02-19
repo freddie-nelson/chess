@@ -8,4 +8,5 @@ type Spot struct {
 	rank          int
 	selected      bool
 	picked        bool
+	highlighted   bool
 }
