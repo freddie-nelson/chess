@@ -94,15 +94,19 @@ func (b *Board) ChangeSelectedSpot(fileOff int, rankOff int) {
 // PickSpot picks the current selected spot
 func (b *Board) PickSpot() {
 	// prevent player from picking spots that don't contain a piece
-	// or don't belong to them
-	if !b.selectedSpot.containsPiece {
-		return
-	} else if b.selectedSpot.piece.color == Black {
+	//
+	if (!b.selectedSpot.containsPiece || b.selectedSpot.piece.color == Black) && !b.selectedSpot.highlighted {
 		return
 	}
 
 	if b.pickedSpot != nil {
 		b.pickedSpot.picked = false
+	}
+
+	if b.selectedSpot.highlighted {
+		b.MovePiece(b.pickedSpot, b.selectedSpot)
+		b.pickedSpot = nil
+		return
 	}
 
 	b.pickedSpot = b.selectedSpot
@@ -114,6 +118,21 @@ func (b *Board) PickSpot() {
 // IsSpotOffBoard returns true if the spot is not on the board
 func (b *Board) IsSpotOffBoard(file int, rank int) bool {
 	return file < 0 || file > Size-1 || rank < 0 || rank > Size-1
+}
+
+// MovePiece moves a piece from a start position on the board to the destination
+func (b *Board) MovePiece(start *Spot, destination *Spot) {
+	piece := start.piece
+	piece.moves++
+
+	start.piece = nil
+	start.containsPiece = false
+
+	destination.piece = piece
+	destination.containsPiece = true
+
+	// clear highlighted possible moves once piece has moved
+	b.ClearHighlighted()
 }
 
 // ToString returns the board's current state as a single string
