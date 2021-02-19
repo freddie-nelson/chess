@@ -2,8 +2,9 @@ package main
 
 // Spot identifies a location on the board
 type Spot struct {
-	piece         *Piece `json: "omitempty"`
+	piece         *Piece
 	containsPiece bool
 	file          int
 	rank          int
+	selected      bool
 }
