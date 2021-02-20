@@ -21,9 +21,10 @@ var PieceStrings []string = []string{"Q", "K", "R", "B", "Kn", "P"}
 
 // Piece : generic class for a chess piece
 type Piece struct {
-	color int
-	class int
-	moves int
+	color        int
+	class        int
+	moves        int
+	canEnPassant bool
 }
 
 // FindValidMoves finds and returns all the legal moves a piece can make from it's current position
@@ -130,7 +131,8 @@ func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[Size][Size]bool, file 
 		if b[rFile][nextRank].containsPiece && b[rFile][nextRank].piece.color == Black {
 			b[rFile][nextRank].highlighted = true
 			validMoves[rFile][nextRank] = true
-		} else if b[rFile][rank].containsPiece && b[rFile][rank].piece.color == Black { // can pawn take en passant
+		} else if b[rFile][rank].containsPiece && b[rFile][rank].piece.color == Black && !b[rFile][nextRank].containsPiece && rank == 3 && b[rFile][rank].piece.moves == 1 && b[file][rank].piece.canEnPassant { // can pawn take en passant
+			b[file][rank].piece.canEnPassant = false
 			b[rFile][nextRank].highlighted = true
 			b[rFile][nextRank].passantMove = true
 			validMoves[rFile][nextRank] = true

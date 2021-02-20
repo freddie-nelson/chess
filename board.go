@@ -40,7 +40,7 @@ func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
 	board[0][rank] = Spot{&Piece{color: color, class: Rook}, true, 0, rank, false, false, false, false}
 	board[1][rank] = Spot{&Piece{color: color, class: Knight}, true, 1, rank, false, false, false, false}
 	board[2][rank] = Spot{&Piece{color: color, class: Bishop}, true, 2, rank, false, false, false, false}
-	board[3][4] = Spot{&Piece{color: Black, class: Queen}, true, 3, 4, false, false, false, false}
+	board[3][rank] = Spot{&Piece{color: color, class: Queen}, true, 3, rank, false, false, false, false}
 	board[4][rank] = Spot{&Piece{color: color, class: King}, true, 4, rank, false, false, false, false}
 	board[5][rank] = Spot{&Piece{color: color, class: Bishop}, true, 5, rank, false, false, false, false}
 	board[6][rank] = Spot{&Piece{color: color, class: Knight}, true, 6, rank, false, false, false, false}
@@ -49,7 +49,7 @@ func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
 
 func placePawnRank(board *[Size][Size]Spot, rank int, color int) {
 	for file := 0; file < Size; file++ {
-		board[file][rank] = Spot{&Piece{color, Pawn, 0}, true, file, rank, false, false, false, false}
+		board[file][rank] = Spot{&Piece{color, Pawn, 0, true}, true, file, rank, false, false, false, false}
 	}
 }
 
