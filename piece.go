@@ -116,7 +116,7 @@ func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[Size][Size]bool, file 
 		if b[lFile][nextRank].containsPiece && b[lFile][nextRank].piece.color == Black {
 			b[lFile][nextRank].highlighted = true
 			validMoves[lFile][nextRank] = true
-		} else if b[lFile][rank].containsPiece && b[lFile][rank].piece.color == Black { // can pawn take en passant
+		} else if b[lFile][rank].containsPiece && b[lFile][rank].piece.color == Black && !b[lFile][nextRank].containsPiece { // can pawn take en passant
 			b[lFile][nextRank].highlighted = true
 			b[lFile][nextRank].passantMove = true
 			validMoves[lFile][nextRank] = true
