@@ -45,28 +45,29 @@ func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int) [Size][S
 
 	switch p.class {
 	case Queen:
-		calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, Size)
+		calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, Size, true)
 	case King:
-		calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, 1)
+		calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, 1, true)
 	case Rook:
-		calculateMovesFromOffsets(b, &validMoves, file, rank, rookXOffs, rookYOffs, Size)
-		calculateMovesFromOffsets(b, &validMoves, file, rank, rookYOffs, rookXOffs, Size)
+		calculateMovesFromOffsets(b, &validMoves, file, rank, rookXOffs, rookYOffs, Size, true)
+		calculateMovesFromOffsets(b, &validMoves, file, rank, rookYOffs, rookXOffs, Size, true)
 	case Bishop:
-		calculateMovesFromOffsets(b, &validMoves, file, rank, bishopXOffs, bishopYOffs, Size)
+		calculateMovesFromOffsets(b, &validMoves, file, rank, bishopXOffs, bishopYOffs, Size, true)
 	case Knight:
 	case Pawn:
 		if p.moves == 0 {
-			calculateMovesFromOffsets(b, &validMoves, file, rank, []int{0}, []int{-1}, 2)
+			calculateMovesFromOffsets(b, &validMoves, file, rank, []int{0}, []int{-1}, 2, false)
 		} else {
-			calculateMovesFromOffsets(b, &validMoves, file, rank, []int{0}, []int{-1}, 1)
-
+			calculateMovesFromOffsets(b, &validMoves, file, rank, []int{0}, []int{-1}, 1, false)
 		}
+
+		checkIfPawnCanTake(b, &validMoves, file, rank)
 	}
 
 	return validMoves
 }
 
-func calculateMovesFromOffsets(board *[Size][Size]Spot, validMoves *[Size][Size]bool, file int, rank int, xOffs []int, yOffs []int, stopAfter int) {
+func calculateMovesFromOffsets(b *[Size][Size]Spot, validMoves *[Size][Size]bool, file int, rank int, xOffs []int, yOffs []int, stopAfter int, canTake bool) {
 	// use offsets to jump across board in the way the piece would
 	for _, xOff := range xOffs {
 		for _, yOff := range yOffs {
@@ -81,11 +82,11 @@ func calculateMovesFromOffsets(board *[Size][Size]Spot, validMoves *[Size][Size]
 					break
 				}
 
-				spot := &board[currentFile][currentRank]
+				spot := &b[currentFile][currentRank]
 				if spot.containsPiece {
-					if spot.piece.color == Black {
+					if spot.piece.color == Black && canTake {
 						if spot.piece.class == King {
-							return
+							break
 						}
 
 						spot.highlighted = true
@@ -99,5 +100,24 @@ func calculateMovesFromOffsets(board *[Size][Size]Spot, validMoves *[Size][Size]
 				}
 			}
 		}
+	}
+}
+
+func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[Size][Size]bool, file int, rank int) {
+	// calculate positions on board of diagonals
+	ldFile := file - 1
+	rdFile := file + 1
+	nextRank := rank - 1
+
+	// left diagonal
+	if !GameState.board.IsSpotOffBoard(ldFile, nextRank) && b[ldFile][nextRank].containsPiece && b[ldFile][nextRank].piece.color == Black {
+		b[ldFile][nextRank].highlighted = true
+		validMoves[ldFile][nextRank] = true
+	}
+
+	// right diagonal
+	if !GameState.board.IsSpotOffBoard(rdFile, nextRank) && b[rdFile][nextRank].containsPiece && b[rdFile][nextRank].piece.color == Black {
+		b[rdFile][nextRank].highlighted = true
+		validMoves[rdFile][nextRank] = true
 	}
 }

@@ -129,8 +129,6 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 	start.piece = nil
 	start.containsPiece = false
 
-	// TODO implement taking pieces
-
 	destination.piece = piece
 	destination.containsPiece = true
 
