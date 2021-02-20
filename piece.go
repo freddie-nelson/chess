@@ -104,20 +104,36 @@ func calculateMovesFromOffsets(b *[Size][Size]Spot, validMoves *[Size][Size]bool
 }
 
 func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[Size][Size]bool, file int, rank int) {
-	// calculate positions on board of diagonals
-	ldFile := file - 1
-	rdFile := file + 1
+	// calculate positions on board
+	lFile := file - 1
+	rFile := file + 1
 	nextRank := rank - 1
 
-	// left diagonal
-	if !GameState.board.IsSpotOffBoard(ldFile, nextRank) && b[ldFile][nextRank].containsPiece && b[ldFile][nextRank].piece.color == Black {
-		b[ldFile][nextRank].highlighted = true
-		validMoves[ldFile][nextRank] = true
+	// left file
+	if !GameState.board.IsSpotOffBoard(lFile, nextRank) {
+
+		// can pawn take diagonally
+		if b[lFile][nextRank].containsPiece && b[lFile][nextRank].piece.color == Black {
+			b[lFile][nextRank].highlighted = true
+			validMoves[lFile][nextRank] = true
+		} else if b[lFile][rank].containsPiece && b[lFile][rank].piece.color == Black { // can pawn take en passant
+			b[lFile][nextRank].highlighted = true
+			b[lFile][nextRank].passantMove = true
+			validMoves[lFile][nextRank] = true
+		}
 	}
 
-	// right diagonal
-	if !GameState.board.IsSpotOffBoard(rdFile, nextRank) && b[rdFile][nextRank].containsPiece && b[rdFile][nextRank].piece.color == Black {
-		b[rdFile][nextRank].highlighted = true
-		validMoves[rdFile][nextRank] = true
+	// right file
+	if !GameState.board.IsSpotOffBoard(rFile, nextRank) {
+
+		// can pawn take diagonally
+		if b[rFile][nextRank].containsPiece && b[rFile][nextRank].piece.color == Black {
+			b[rFile][nextRank].highlighted = true
+			validMoves[rFile][nextRank] = true
+		} else if b[rFile][rank].containsPiece && b[rFile][rank].piece.color == Black { // can pawn take en passant
+			b[rFile][nextRank].highlighted = true
+			b[rFile][nextRank].passantMove = true
+			validMoves[rFile][nextRank] = true
+		}
 	}
 }

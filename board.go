@@ -37,19 +37,19 @@ func (b *Board) Setup() {
 }
 
 func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
-	board[0][rank] = Spot{&Piece{color: color, class: Rook}, true, 0, rank, false, false, false}
-	board[1][rank] = Spot{&Piece{color: color, class: Knight}, true, 1, rank, false, false, false}
-	board[2][rank] = Spot{&Piece{color: color, class: Bishop}, true, 2, rank, false, false, false}
-	board[3][rank] = Spot{&Piece{color: color, class: Queen}, true, 3, rank, false, false, false}
-	board[4][rank] = Spot{&Piece{color: color, class: King}, true, 4, rank, false, false, false}
-	board[5][rank] = Spot{&Piece{color: color, class: Bishop}, true, 5, rank, false, false, false}
-	board[6][rank] = Spot{&Piece{color: color, class: Knight}, true, 6, rank, false, false, false}
-	board[7][rank] = Spot{&Piece{color: color, class: Rook}, true, 7, rank, false, false, false}
+	board[0][rank] = Spot{&Piece{color: color, class: Rook}, true, 0, rank, false, false, false, false}
+	board[1][rank] = Spot{&Piece{color: color, class: Knight}, true, 1, rank, false, false, false, false}
+	board[2][rank] = Spot{&Piece{color: color, class: Bishop}, true, 2, rank, false, false, false, false}
+	board[3][4] = Spot{&Piece{color: Black, class: Queen}, true, 3, 4, false, false, false, false}
+	board[4][rank] = Spot{&Piece{color: color, class: King}, true, 4, rank, false, false, false, false}
+	board[5][rank] = Spot{&Piece{color: color, class: Bishop}, true, 5, rank, false, false, false, false}
+	board[6][rank] = Spot{&Piece{color: color, class: Knight}, true, 6, rank, false, false, false, false}
+	board[7][rank] = Spot{&Piece{color: color, class: Rook}, true, 7, rank, false, false, false, false}
 }
 
 func placePawnRank(board *[Size][Size]Spot, rank int, color int) {
 	for file := 0; file < Size; file++ {
-		board[file][rank] = Spot{&Piece{color, Pawn, 0}, true, file, rank, false, false, false}
+		board[file][rank] = Spot{&Piece{color, Pawn, 0}, true, file, rank, false, false, false, false}
 	}
 }
 
@@ -58,6 +58,7 @@ func (b *Board) ClearHighlighted() {
 	for rank := 0; rank < Size; rank++ {
 		for file := 0; file < Size; file++ {
 			b.grid[file][rank].highlighted = false
+			b.grid[file][rank].passantMove = false
 		}
 	}
 }
@@ -131,6 +132,13 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 
 	destination.piece = piece
 	destination.containsPiece = true
+
+	// if pawn move results in en passant, take piece behind destination
+	if destination.passantMove {
+		passantSpot := &b.grid[destination.file][start.rank]
+		passantSpot.piece = nil
+		passantSpot.containsPiece = false
+	}
 
 	// clear highlighted possible moves once piece has moved
 	b.ClearHighlighted()
