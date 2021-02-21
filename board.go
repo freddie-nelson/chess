@@ -49,7 +49,7 @@ func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
 
 func placePawnRank(board *[Size][Size]Spot, rank int, color int) {
 	for file := 0; file < Size; file++ {
-		board[file][rank] = Spot{&Piece{color, Pawn, 0, true}, true, file, rank, false, false, false, false}
+		board[file][rank] = Spot{&Piece{color, Pawn, 0, 2}, true, file, rank, false, false, false, false}
 	}
 }
 
@@ -142,6 +142,34 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 
 	// clear highlighted possible moves once piece has moved
 	b.ClearHighlighted()
+}
+
+// IsKingInCheck goes through each opponent piece on the board and checks if they are attacking
+// the player's king
+// returns either true (the king is in check) or false (the king is not in check)
+func (b *Board) IsKingInCheck() bool {
+	inCheck := false
+
+	// find king on board
+	// var king *Spot
+	// for rank := 0; rank < Size; rank++ {
+	// 	for file := 0; file < Size; file++ {
+	// 		if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.class == King && b.grid[file][rank].piece.color == White {
+	// 			king = &b.grid[file][rank]
+	// 		}
+	// 	}
+	// }
+
+	// check if any opponent's piece puts the king in check
+	for rank := 0; rank < Size; rank++ {
+		for file := 0; file < Size; file++ {
+			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == Black {
+				_, inCheck = b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank)
+			}
+		}
+	}
+
+	return inCheck
 }
 
 // ToString returns the board's current state as a single string
