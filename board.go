@@ -40,7 +40,7 @@ func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
 	board[0][rank] = Spot{&Piece{color: color, class: Rook}, true, 0, rank, false, false, false, false}
 	board[1][rank] = Spot{&Piece{color: color, class: Knight}, true, 1, rank, false, false, false, false}
 	board[2][rank] = Spot{&Piece{color: color, class: Bishop}, true, 2, rank, false, false, false, false}
-	board[3][rank] = Spot{&Piece{color: color, class: Queen}, true, 3, rank, false, false, false, false}
+	board[6][5] = Spot{&Piece{color: Black, class: Queen}, true, 6, 5, false, false, false, false}
 	board[4][rank] = Spot{&Piece{color: color, class: King}, true, 4, rank, false, false, false, false}
 	board[5][rank] = Spot{&Piece{color: color, class: Bishop}, true, 5, rank, false, false, false, false}
 	board[6][rank] = Spot{&Piece{color: color, class: Knight}, true, 6, rank, false, false, false, false}
@@ -96,7 +96,6 @@ func (b *Board) ChangeSelectedSpot(fileOff int, rankOff int) {
 // PickSpot picks the current selected spot
 func (b *Board) PickSpot() {
 	// prevent player from picking spots that don't contain a piece
-	//
 	if (!b.selectedSpot.containsPiece || b.selectedSpot.piece.color == Black) && !b.selectedSpot.highlighted {
 		return
 	}
@@ -114,7 +113,7 @@ func (b *Board) PickSpot() {
 	b.pickedSpot = b.selectedSpot
 	b.pickedSpot.picked = true
 
-	b.pickedSpot.piece.FindValidMoves(b.grid, b.pickedSpot.file, b.pickedSpot.rank)
+	b.pickedSpot.piece.FindValidMoves(b.grid, b.pickedSpot.file, b.pickedSpot.rank, Black)
 }
 
 // IsSpotOffBoard returns true if the spot is not on the board
@@ -134,10 +133,29 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 	destination.containsPiece = true
 
 	// if pawn move results in en passant, take piece behind destination
+	var passantPiece *Piece
 	if destination.passantMove {
 		passantSpot := &b.grid[destination.file][start.rank]
+		passantPiece = passantSpot.piece
 		passantSpot.piece = nil
 		passantSpot.containsPiece = false
+	}
+
+	// if move puts player's king in check then revert the move
+	if b.IsKingInCheck() {
+		piece.moves--
+
+		start.piece = piece
+		start.containsPiece = true
+
+		destination.piece = nil
+		destination.containsPiece = false
+
+		if destination.passantMove {
+			passantSpot := &b.grid[destination.file][start.rank]
+			passantSpot.piece = passantPiece
+			passantSpot.containsPiece = true
+		}
 	}
 
 	// clear highlighted possible moves once piece has moved
@@ -148,8 +166,6 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 // the player's king
 // returns either true (the king is in check) or false (the king is not in check)
 func (b *Board) IsKingInCheck() bool {
-	inCheck := false
-
 	// find king on board
 	// var king *Spot
 	// for rank := 0; rank < Size; rank++ {
@@ -164,12 +180,16 @@ func (b *Board) IsKingInCheck() bool {
 	for rank := 0; rank < Size; rank++ {
 		for file := 0; file < Size; file++ {
 			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == Black {
-				_, inCheck = b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank)
+				_, inCheck := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, White)
+				if inCheck {
+					fmt.Printf(" file: %v rank: %v", file, rank)
+					return true
+				}
 			}
 		}
 	}
 
-	return inCheck
+	return false
 }
 
 // ToString returns the board's current state as a single string
