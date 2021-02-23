@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"unicode"
 )
 
 // Board stores details about the boards state
@@ -22,39 +23,52 @@ func (b *Board) Setup() {
 		}
 	}
 
-	// oppenent's pieces
-	placeBackRank(&board, 0, Black)
-	placePawnRank(&board, 1, Black)
-
-	// player's pieces
-	placeBackRank(&board, 7, White)
-	placePawnRank(&board, 6, White)
-
 	b.selectedSpot = &board[0][7]
 	b.selectedSpot.selected = true
-
 	b.grid = &board
+
+	// generate starting position
+	startingFEN := "r1b1k1nr/p2p1pNp/n2B4/1p1NP2P/6P1/3P1Q2/P1P1K3/q5b1"
+	b.GenerateFromFENString(startingFEN)
 }
 
 // GenerateFromFENString creates a particular board position from a provided valid FEN string
-func GenerateFromFENString(fen string) {
+func (b *Board) GenerateFromFENString(fen string) {
+	for rank, fenRank := range strings.Split(fen, "/") {
+		file := 0
 
-}
+		for _, char := range fenRank {
+			var color int
+			var class int
 
-func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
-	board[0][rank] = Spot{&Piece{color: color, class: Rook}, true, 0, rank, false, false, false, false}
-	board[1][rank] = Spot{&Piece{color: color, class: Knight}, true, 1, rank, false, false, false, false}
-	board[2][rank] = Spot{&Piece{color: color, class: Bishop}, true, 2, rank, false, false, false, false}
-	board[6][5] = Spot{&Piece{color: Black, class: Queen}, true, 6, 5, false, false, false, false}
-	board[4][rank] = Spot{&Piece{color: color, class: King}, true, 4, rank, false, false, false, false}
-	board[5][rank] = Spot{&Piece{color: color, class: Bishop}, true, 5, rank, false, false, false, false}
-	board[6][rank] = Spot{&Piece{color: color, class: Knight}, true, 6, rank, false, false, false, false}
-	board[7][rank] = Spot{&Piece{color: color, class: Rook}, true, 7, rank, false, false, false, false}
-}
+			if unicode.IsNumber(char) {
+				file += int(char - '0')
+				continue
+			} else if unicode.IsLower(char) {
+				color = Black
+			} else {
+				color = White
+			}
 
-func placePawnRank(board *[Size][Size]Spot, rank int, color int) {
-	for file := 0; file < Size; file++ {
-		board[file][rank] = Spot{&Piece{color, Pawn, 0, 2}, true, file, rank, false, false, false, false}
+			switch unicode.ToUpper(char) {
+			case 'Q':
+				class = Queen
+			case 'K':
+				class = King
+			case 'R':
+				class = Rook
+			case 'B':
+				class = Bishop
+			case 'N':
+				class = Knight
+			case 'P':
+				class = Pawn
+			}
+
+			b.grid[file][rank].containsPiece = true
+			b.grid[file][rank].piece = &Piece{color: color, class: class}
+			file++
+		}
 	}
 }
 
