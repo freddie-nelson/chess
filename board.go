@@ -36,6 +36,11 @@ func (b *Board) Setup() {
 	b.grid = &board
 }
 
+// GenerateFromFENString creates a particular board position from a provided valid FEN string
+func GenerateFromFENString(fen string) {
+
+}
+
 func placeBackRank(board *[Size][Size]Spot, rank int, color int) {
 	board[0][rank] = Spot{&Piece{color: color, class: Rook}, true, 0, rank, false, false, false, false}
 	board[1][rank] = Spot{&Piece{color: color, class: Knight}, true, 1, rank, false, false, false, false}
@@ -249,10 +254,6 @@ func (b *Board) ToString() string {
 						}
 
 						pieceStr := PieceStrings[piece.class]
-
-						if piece.class == Knight {
-							pieceStr = "\b" + pieceStr
-						}
 
 						spotStr = pieceColor + pieceStr
 					}
