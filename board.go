@@ -28,13 +28,55 @@ func (b *Board) Setup() {
 	b.grid = &board
 
 	// generate starting position
-	startingFEN := "r1b1k1nr/p2p1pNp/n2B4/1p1NP2P/6P1/3P1Q2/P1P1K3/q5b1"
+	startingFEN := "rnbqkbnr/1ppp1ppp/p7/4pP2/8/8/PPPPP1PP/RNBQKBNR w KQkq e6 0 3"
 	b.GenerateFromFENString(startingFEN)
 }
 
 // GenerateFromFENString creates a particular board position from a provided valid FEN string
 func (b *Board) GenerateFromFENString(fen string) {
-	for rank, fenRank := range strings.Split(fen, "/") {
+	piecePlacements := strings.Split(fen, "/")
+
+	last := strings.Split(piecePlacements[7], " ")
+	piecePlacements[7] = last[0]
+	fields := last[1:]
+
+	// current turn
+	if fields[0] == "b" {
+		GameState.turn = Black
+	} else {
+		GameState.turn = White
+	}
+
+	// castling rights
+	GameState.blackCastling = &CastlingRights{false, false}
+	GameState.whiteCastling = &CastlingRights{false, false}
+
+	for _, rights := range fields[1] {
+		if unicode.IsLower(rights) {
+			if rights == 'k' {
+				GameState.blackCastling.kingside = true
+			} else {
+				GameState.blackCastling.queenside = true
+			}
+		} else {
+			if rights == 'K' {
+				GameState.whiteCastling.kingside = true
+			} else {
+				GameState.whiteCastling.queenside = true
+			}
+		}
+	}
+
+	// en passant targets
+	file, rank := b.locationToFileAndRank(fields[2])
+	b.grid[file][rank].passantTarget = 2
+
+	// fullmoves and halfmoves
+	GameState.halfmoves = int(fields[3][0] - '0')
+	GameState.fullmoves = int(fields[4][0] - '0')
+
+	// place pieces
+	for rank, fenRank := range piecePlacements {
 		file := 0
 
 		for _, char := range fenRank {
@@ -72,12 +114,19 @@ func (b *Board) GenerateFromFENString(fen string) {
 	}
 }
 
+func (b *Board) locationToFileAndRank(loc string) (int, int) {
+	file := int(loc[0] - 'a')
+	rank := 8 - int(loc[1]-'0')
+	fmt.Printf(" file: %v rank: %v", file, rank)
+	return file, rank
+}
+
 // ClearHighlighted sets all highlighted squares back to not highlighted
 func (b *Board) ClearHighlighted() {
 	for rank := 0; rank < Size; rank++ {
 		for file := 0; file < Size; file++ {
 			b.grid[file][rank].highlighted = false
-			b.grid[file][rank].passantMove = false
+			b.grid[file][rank].passantTarget--
 		}
 	}
 }
@@ -142,7 +191,10 @@ func (b *Board) IsSpotOffBoard(file int, rank int) bool {
 
 // MovePiece moves a piece from a start position on the board to the destination
 func (b *Board) MovePiece(start *Spot, destination *Spot) {
+	turnSuccessful := true
+
 	piece := start.piece
+	destinationPiece := destination.piece
 	piece.moves++
 
 	start.piece = nil
@@ -151,9 +203,14 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 	destination.piece = piece
 	destination.containsPiece = true
 
+	// if it is pawns first move and moved 2 places make spot behind pawn en passant target for next turn
+	if destination.piece.class == Pawn && destination.piece.moves == 1 && destination.rank == 4 {
+		b.grid[destination.file][destination.rank+1].passantTarget = 2
+	}
+
 	// if pawn move results in en passant, take piece behind destination
 	var passantPiece *Piece
-	if destination.passantMove {
+	if destination.passantTarget > 0 {
 		passantSpot := &b.grid[destination.file][start.rank]
 		passantPiece = passantSpot.piece
 		passantSpot.piece = nil
@@ -167,13 +224,27 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 		start.piece = piece
 		start.containsPiece = true
 
-		destination.piece = nil
-		destination.containsPiece = false
+		destination.piece = destinationPiece
+		destination.containsPiece = destinationPiece != nil
 
-		if destination.passantMove {
+		if destination.passantTarget > 0 {
 			passantSpot := &b.grid[destination.file][start.rank]
 			passantSpot.piece = passantPiece
 			passantSpot.containsPiece = true
+		}
+
+		turnSuccessful = false
+	}
+
+	// if turn was successfully played then pass turn to opponent
+	if turnSuccessful {
+		GameState.halfmoves++
+
+		if GameState.turn == Black {
+			GameState.fullmoves++
+			GameState.turn = White
+		} else {
+			GameState.turn = Black
 		}
 	}
 
@@ -201,7 +272,7 @@ func (b *Board) IsKingInCheck() bool {
 			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == Black {
 				_, inCheck := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, White)
 				if inCheck {
-					fmt.Printf(" file: %v rank: %v", file, rank)
+					// fmt.Printf(" file: %v rank: %v", file, rank)
 					return true
 				}
 			}

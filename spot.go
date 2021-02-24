@@ -9,5 +9,5 @@ type Spot struct {
 	selected      bool
 	picked        bool
 	highlighted   bool
-	passantMove   bool
+	passantTarget int
 }
