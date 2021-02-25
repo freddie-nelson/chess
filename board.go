@@ -28,7 +28,7 @@ func (b *Board) Setup() {
 	b.grid = &board
 
 	// generate starting position
-	startingFEN := "rnbqkbnr/1ppp1ppp/p7/4pP2/8/8/PPPPP1PP/RNBQKBNR w KQkq e6 0 3"
+	startingFEN := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 	b.GenerateFromFENString(startingFEN)
 }
 
@@ -68,8 +68,10 @@ func (b *Board) GenerateFromFENString(fen string) {
 	}
 
 	// en passant targets
-	file, rank := b.locationToFileAndRank(fields[2])
-	b.grid[file][rank].passantTarget = 2
+	if fields[2] != "-" {
+		file, rank := b.locationToFileAndRank(fields[2])
+		b.grid[file][rank].passantTarget = 2
+	}
 
 	// fullmoves and halfmoves
 	GameState.halfmoves = int(fields[3][0] - '0')

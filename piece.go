@@ -43,6 +43,10 @@ func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponent
 	// queen offsets
 	queenOffs := []int{0, 0, -1, 1}
 
+	// knight offsets
+	knightXOffs := []int{2, -2}
+	knightYOffs := []int{1, -1}
+
 	GameState.board.ClearHighlighted()
 
 	checksKing := false
@@ -62,6 +66,8 @@ func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponent
 	case Bishop:
 		calculateMovesFromOffsets(b, &validMoves, file, rank, bishopXOffs, bishopYOffs, Size, true, opponentColor)
 	case Knight:
+		calculateMovesFromOffsets(b, &validMoves, file, rank, knightXOffs, knightYOffs, 1, true, opponentColor)
+		calculateMovesFromOffsets(b, &validMoves, file, rank, knightYOffs, knightXOffs, 1, true, opponentColor)
 	case Pawn:
 		if p.moves == 0 {
 			calculateMovesFromOffsets(b, &validMoves, file, rank, []int{0}, []int{-1}, 2, false, opponentColor)
