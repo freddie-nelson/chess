@@ -28,7 +28,7 @@ func (b *Board) Setup() {
 	b.grid = &board
 
 	// generate starting position
-	startingFEN := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+	startingFEN := "R6k/8/8/8/8/8/8/1Q6 w KQkq - 0 1"
 	b.GenerateFromFENString(startingFEN)
 }
 
@@ -236,6 +236,10 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 		}
 
 		turnSuccessful = false
+
+		if b.IsCheckmate() {
+			GameState.ended = true
+		}
 	}
 
 	// if turn was successfully played then pass turn to opponent
@@ -250,6 +254,10 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 		}
 	}
 
+	if GameState.fullmoves == 50 {
+		GameState.ended = true
+	}
+
 	// clear highlighted possible moves once piece has moved
 	b.ClearHighlighted()
 }
@@ -258,15 +266,6 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 // the player's king
 // returns either true (the king is in check) or false (the king is not in check)
 func (b *Board) IsKingInCheck() bool {
-	// find king on board
-	// var king *Spot
-	// for rank := 0; rank < Size; rank++ {
-	// 	for file := 0; file < Size; file++ {
-	// 		if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.class == King && b.grid[file][rank].piece.color == White {
-	// 			king = &b.grid[file][rank]
-	// 		}
-	// 	}
-	// }
 
 	// check if any opponent's piece puts the king in check
 	for rank := 0; rank < Size; rank++ {
@@ -279,6 +278,48 @@ func (b *Board) IsKingInCheck() bool {
 				}
 			}
 		}
+	}
+
+	return false
+}
+
+// IsCheckmate checks if player is in checkmate
+func (b *Board) IsCheckmate() bool {
+	// find king on board
+	var king *Spot
+	for rank := 0; rank < Size; rank++ {
+		for file := 0; file < Size; file++ {
+			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.class == King && b.grid[file][rank].piece.color == White {
+				king = &b.grid[file][rank]
+			}
+		}
+	}
+
+	// get king moves
+	kingMoves, _ := king.piece.FindValidMoves(b.grid, king.file, king.rank, Black)
+
+	// check if any opponent piece is attacking a spot the king can move to
+	for rank := 0; rank < Size; rank++ {
+		for file := 0; file < Size; file++ {
+			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == Black {
+				moves, _ := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, Black)
+
+				// check if the piece is attacking any of the kings moves
+				for _, move := range moves {
+					for i, kingMove := range kingMoves {
+						if move.file == kingMove.file && move.rank == kingMove.rank {
+							kingMoves = append(kingMoves[:], kingMoves[i+1:]...)
+						}
+					}
+				}
+			}
+		}
+
+		if len(kingMoves) == 0 {
+			return true
+		}
+
+		return false
 	}
 
 	return false
