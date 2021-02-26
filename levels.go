@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	tl "github.com/JoelOtter/termloop"
 )
@@ -15,7 +14,7 @@ type BoardEntity struct {
 // Draw draws the boards current state to the console
 func (b *BoardEntity) Draw(s *tl.Screen) {
 	output := GameState.board.ToString()
-	fmt.Printf("\033[0;0H%s%v", output, time.Now())
+	fmt.Printf("\033[0;0H%s", output)
 }
 
 // Tick reacts to changes in the game's state every tick
