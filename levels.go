@@ -14,7 +14,7 @@ type BoardEntity struct {
 // Draw draws the boards current state to the console
 func (b *BoardEntity) Draw(s *tl.Screen) {
 	output := GameState.board.ToString()
-	fmt.Printf("\033[0;0H%s", output)
+	fmt.Printf("\033[0;0H%s game ended: %v", output, GameState.ended)
 }
 
 // Tick reacts to changes in the game's state every tick

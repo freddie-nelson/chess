@@ -8,6 +8,8 @@ type CastlingRights struct {
 
 // Game stores values about the games current state
 type Game struct {
+	color         int
+	opponentColor int
 	board         *Board
 	ended         bool
 	turn          int
