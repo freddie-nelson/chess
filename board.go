@@ -28,7 +28,7 @@ func (b *Board) Setup() {
 	b.grid = &board
 
 	// generate starting position
-	startingFEN := "R6k/8/8/8/8/8/8/1QKq4 w KQkq - 0 1"
+	startingFEN := "R6k/8/8/8/8/8/8/1RKq4 w KQkq - 0 1"
 	b.GenerateFromFENString(startingFEN)
 }
 
@@ -252,7 +252,7 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 }
 
 func (b *Board) nextTurn(color int, opponentColor int) {
-	if b.IsCheckmate(opponentColor, color) {
+	if b.IsCheckmate(color, opponentColor) {
 		GameState.ended = true
 	} else {
 		GameState.ended = false
@@ -291,7 +291,7 @@ func (b *Board) IsKingInCheck(color int, opponentColor int) bool {
 	return false
 }
 
-// IsCheckmate checks if player is in checkmate
+// IsCheckmate checks if opponentColor is in checkmate
 func (b *Board) IsCheckmate(color int, opponentColor int) bool {
 	// find king on board
 	var king *Spot
@@ -306,51 +306,18 @@ func (b *Board) IsCheckmate(color int, opponentColor int) bool {
 	// get king moves
 	kingMoves, _ := king.piece.FindValidMoves(b.grid, king.file, king.rank, color)
 
-	// find if any opponent piece is attacking a spot the king can move to
-	markedSpots, _ := b.MarkMovesIfCrossover(kingMoves, color)
-
-	// find if player's piece can take attacking piece and move out of
-	markedSpotCount := 0
-	for _, marked := range markedSpots {
-		if marked {
-			markedSpotCount++
-		}
-	}
-
-	fmt.Print(len(markedSpots))
-	fmt.Print(markedSpotCount)
-	fmt.Print(len(kingMoves))
-
-	if markedSpotCount == len(kingMoves) {
-		return true
-	}
-
-	return false
-}
-
-// MarkMovesIfCrossover checks to see if any piece on the board of color can move to a spot in an array of spots
-// returns array of booleans representing the marked spots, parallel to spots and
-// returns list of spots that can move to any of the given spots
-func (b *Board) MarkMovesIfCrossover(spots []Spot, color int) ([]bool, []Spot) {
-	markedSpots := make([]bool, len(spots))
-	pieces := make([]Spot, 0)
-
+	// find king moves that are attacked by opponent pieces
 	for rank := 0; rank < Size; rank++ {
 		for file := 0; file < Size; file++ {
+
 			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == color {
-				moves, _ := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, color)
-				added := false
+				moves, _ := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, opponentColor)
 
-				// check spots crossover
+				// check if the piece is attacking any of the kings moves
 				for _, move := range moves {
-					for i := 0; i < len(spots)-1; i++ {
-						if move.file == spots[i].file && move.rank == spots[i].rank {
-
-							if !added {
-								markedSpots[i] = true
-								pieces = append(pieces, b.grid[file][rank])
-								added = true
-							}
+					for i, kingMove := range kingMoves {
+						if move.file == kingMove.file && move.rank == kingMove.rank {
+							kingMoves[i].highlighted = true
 						}
 					}
 				}
@@ -358,7 +325,19 @@ func (b *Board) MarkMovesIfCrossover(spots []Spot, color int) ([]bool, []Spot) {
 		}
 	}
 
-	return markedSpots, pieces
+	attackedSpotsCount := 0
+	for _, m := range kingMoves {
+		if m.highlighted {
+			attackedSpotsCount++
+		}
+	}
+
+	// find if player's piece can take attacking piece and move out of
+	if attackedSpotsCount == len(kingMoves) {
+		return true
+	}
+
+	return false
 }
 
 func remove(s []Spot, i int) []Spot {
