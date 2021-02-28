@@ -107,19 +107,33 @@ func calculateMovesFromOffsets(b *[Size][Size]Spot, validMoves *[]Spot, file int
 						}
 
 						spot.highlighted = true
-						*validMoves = append(*validMoves, Spot{file: currentFile, rank: currentRank})
+						if !isMoveAlreadyAdded(validMoves, currentFile, currentRank) {
+							*validMoves = append(*validMoves, Spot{file: currentFile, rank: currentRank})
+						}
 					}
 
 					break
 				} else {
 					spot.highlighted = true
-					*validMoves = append(*validMoves, Spot{file: currentFile, rank: currentRank})
+					if !isMoveAlreadyAdded(validMoves, currentFile, currentRank) {
+						*validMoves = append(*validMoves, Spot{file: currentFile, rank: currentRank})
+					}
 				}
 			}
 		}
 	}
 
 	return checksKing
+}
+
+func isMoveAlreadyAdded(validMoves *[]Spot, file int, rank int) bool {
+	for _, move := range *validMoves {
+		if move.file == file && move.rank == rank {
+			return true
+		}
+	}
+
+	return false
 }
 
 func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[]Spot, file int, rank int, opponentColor int) bool {
