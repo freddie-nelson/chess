@@ -21,7 +21,7 @@ func main() {
 	boardLevel := SetupBoardLevel()
 	screen.SetLevel(boardLevel)
 
-	screen.SetFps(5)
+	screen.SetFps(24)
 
 	game.Start()
 }

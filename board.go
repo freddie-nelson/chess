@@ -252,7 +252,7 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 }
 
 func (b *Board) nextTurn(color int, opponentColor int) {
-	if b.IsCheckmate(color, opponentColor) {
+	if b.isKingTrapped(color, opponentColor) {
 		GameState.ended = true
 	} else {
 		GameState.ended = false
@@ -291,8 +291,8 @@ func (b *Board) IsKingInCheck(color int, opponentColor int) bool {
 	return false
 }
 
-// IsCheckmate checks if opponentColor is in checkmate
-func (b *Board) IsCheckmate(color int, opponentColor int) bool {
+// IsKingTrapped checks if opponentColor's king moves are all blocked
+func (b *Board) isKingTrapped(color int, opponentColor int) bool {
 	// find king on board
 	var king *Spot
 	for rank := 0; rank < Size; rank++ {
@@ -327,12 +327,11 @@ func (b *Board) IsCheckmate(color int, opponentColor int) bool {
 
 	attackedSpotsCount := 0
 	for _, m := range kingMoves {
-		if m.highlighted {
+		if m.highlighted || b.grid[m.file][m.rank].containsPiece {
 			attackedSpotsCount++
 		}
 	}
 
-	// find if player's piece can take attacking piece and move out of
 	if attackedSpotsCount == len(kingMoves) {
 		return true
 	}
