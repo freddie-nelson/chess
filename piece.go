@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 // Enum type of piece
 const (
 	Queen int = iota
@@ -24,6 +28,33 @@ type Piece struct {
 	color int
 	class int
 	moves int
+}
+
+// SimulateMove simualates a move on a clone of the current board
+// returns if the king is in check in the new board state
+func (p *Piece) SimulateMove(s *Spot, d *Spot) bool {
+	simulatedBoard := *GameState.board.grid
+
+	start := &simulatedBoard[s.file][s.rank]
+	destination := &simulatedBoard[d.file][d.rank]
+
+	piece := start.piece
+	start.piece = nil
+	start.containsPiece = false
+
+	destination.piece = piece
+	destination.containsPiece = true
+
+	opponentColor := Black
+	if piece.color == Black {
+		opponentColor = White
+	}
+
+	if GameState.board.IsKingInCheck(piece.color, opponentColor, &simulatedBoard) {
+		return true
+	}
+
+	return false
 }
 
 // FindValidMoves finds and returns all the legal moves a piece can make from it's current position
@@ -56,6 +87,15 @@ func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponent
 		checksKing = calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, Size, true, opponentColor)
 	case King:
 		checksKing = calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, 1, true, opponentColor)
+
+		// remove moves that cause king to be put in check
+		for i := len(validMoves) - 1; i >= 0; i-- {
+			if p.SimulateMove(&b[file][rank], &validMoves[i]) {
+				// remove move
+				validMoves = append(validMoves[:i], validMoves[i+1:]...)
+			}
+		}
+		fmt.Print(len(validMoves))
 	case Rook:
 		checksKing = calculateMovesFromOffsets(b, &validMoves, file, rank, rookXOffs, rookYOffs, Size, true, opponentColor)
 		if checksKing {
@@ -106,7 +146,6 @@ func calculateMovesFromOffsets(b *[Size][Size]Spot, validMoves *[]Spot, file int
 							break
 						}
 
-						spot.highlighted = true
 						if !isMoveAlreadyAdded(validMoves, currentFile, currentRank) {
 							*validMoves = append(*validMoves, Spot{file: currentFile, rank: currentRank})
 						}
@@ -114,7 +153,6 @@ func calculateMovesFromOffsets(b *[Size][Size]Spot, validMoves *[]Spot, file int
 
 					break
 				} else {
-					spot.highlighted = true
 					if !isMoveAlreadyAdded(validMoves, currentFile, currentRank) {
 						*validMoves = append(*validMoves, Spot{file: currentFile, rank: currentRank})
 					}
@@ -152,11 +190,9 @@ func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[]Spot, file int, rank 
 			if b[lFile][nextRank].piece.class == King {
 				checksKing = true
 			} else {
-				b[lFile][nextRank].highlighted = true
 				*validMoves = append(*validMoves, Spot{file: lFile, rank: nextRank})
 			}
 		} else if !b[lFile][nextRank].containsPiece && b[lFile][nextRank].passantTarget > 0 { // can pawn take en passant
-			b[lFile][nextRank].highlighted = true
 			*validMoves = append(*validMoves, Spot{file: lFile, rank: nextRank})
 		}
 	}
@@ -169,11 +205,9 @@ func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[]Spot, file int, rank 
 			if b[rFile][nextRank].piece.class == King {
 				checksKing = true
 			} else {
-				b[rFile][nextRank].highlighted = true
 				*validMoves = append(*validMoves, Spot{file: rFile, rank: nextRank})
 			}
 		} else if !b[rFile][nextRank].containsPiece && b[rFile][nextRank].passantTarget > 0 { // can pawn take en passant
-			b[rFile][nextRank].highlighted = true
 			*validMoves = append(*validMoves, Spot{file: rFile, rank: nextRank})
 		}
 	}

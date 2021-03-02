@@ -183,7 +183,14 @@ func (b *Board) PickSpot() {
 	b.pickedSpot = b.selectedSpot
 	b.pickedSpot.picked = true
 
-	b.pickedSpot.piece.FindValidMoves(b.grid, b.pickedSpot.file, b.pickedSpot.rank, Black)
+	validMoves, _ := b.pickedSpot.piece.FindValidMoves(b.grid, b.pickedSpot.file, b.pickedSpot.rank, Black)
+	b.highlightMoves(validMoves)
+}
+
+func (b *Board) highlightMoves(moves []Spot) {
+	for _, m := range moves {
+		b.grid[m.file][m.rank].highlighted = true
+	}
 }
 
 // IsSpotOffBoard returns true if the spot is not on the board
@@ -224,7 +231,7 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 	if GameState.turn == Black {
 		opponentColor = White
 	}
-	if b.IsKingInCheck(GameState.turn, opponentColor) {
+	if b.IsKingInCheck(GameState.turn, opponentColor, nil) {
 		piece.moves--
 
 		start.piece = piece
@@ -252,11 +259,11 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 }
 
 func (b *Board) nextTurn(color int, opponentColor int) {
-	if b.isKingTrapped(color, opponentColor) {
-		GameState.ended = true
-	} else {
-		GameState.ended = false
-	}
+	// if b.isKingTrapped(color, opponentColor) {
+	// 	GameState.ended = true
+	// } else {
+	// 	GameState.ended = false
+	// }
 
 	GameState.halfmoves++
 	if GameState.turn == Black {
@@ -272,15 +279,19 @@ func (b *Board) nextTurn(color int, opponentColor int) {
 }
 
 // IsKingInCheck goes through each opponent piece on the board and checks if they are attacking
-// the player's king
+// color's king
 // returns either true (the king is in check) or false (the king is not in check)
-func (b *Board) IsKingInCheck(color int, opponentColor int) bool {
+func (b *Board) IsKingInCheck(color int, opponentColor int, simulatedBoard *[Size][Size]Spot) bool {
+	board := b.grid
+	if simulatedBoard != nil {
+		board = simulatedBoard
+	}
 
 	// check if any opponent's piece puts the king in check
 	for rank := 0; rank < Size; rank++ {
 		for file := 0; file < Size; file++ {
-			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == opponentColor {
-				_, inCheck := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, color)
+			if board[file][rank].containsPiece && board[file][rank].piece.color == opponentColor && board[file][rank].piece.class != King {
+				_, inCheck := board[file][rank].piece.FindValidMoves(board, file, rank, color)
 				if inCheck {
 					return true
 				}
@@ -292,57 +303,52 @@ func (b *Board) IsKingInCheck(color int, opponentColor int) bool {
 }
 
 // IsKingTrapped checks if opponentColor's king moves are all blocked
-func (b *Board) isKingTrapped(color int, opponentColor int) bool {
-	// find king on board
-	var king *Spot
-	for rank := 0; rank < Size; rank++ {
-		for file := 0; file < Size; file++ {
-			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.class == King && b.grid[file][rank].piece.color == opponentColor {
-				king = &b.grid[file][rank]
-			}
-		}
-	}
+// func (b *Board) isKingTrapped(color int, opponentColor int) bool {
+// 	// find king on board
+// 	var king *Spot
+// 	for rank := 0; rank < Size; rank++ {
+// 		for file := 0; file < Size; file++ {
+// 			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.class == King && b.grid[file][rank].piece.color == opponentColor {
+// 				king = &b.grid[file][rank]
+// 			}
+// 		}
+// 	}
 
-	// get king moves
-	kingMoves, _ := king.piece.FindValidMoves(b.grid, king.file, king.rank, color)
+// 	// get king moves
+// 	kingMoves, _ := king.piece.FindValidMoves(b.grid, king.file, king.rank, color)
 
-	// find king moves that are attacked by opponent pieces
-	for rank := 0; rank < Size; rank++ {
-		for file := 0; file < Size; file++ {
+// 	// find king moves that are attacked by opponent pieces
+// 	for rank := 0; rank < Size; rank++ {
+// 		for file := 0; file < Size; file++ {
 
-			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == color {
-				moves, _ := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, opponentColor)
+// 			if b.grid[file][rank].containsPiece && b.grid[file][rank].piece.color == color {
+// 				moves, _ := b.grid[file][rank].piece.FindValidMoves(b.grid, file, rank, opponentColor)
 
-				// check if the piece is attacking any of the kings moves
-				for _, move := range moves {
-					for i, kingMove := range kingMoves {
-						if move.file == kingMove.file && move.rank == kingMove.rank {
-							kingMoves[i].highlighted = true
-						}
-					}
-				}
-			}
-		}
-	}
+// 				// check if the piece is attacking any of the kings moves
+// 				for _, move := range moves {
+// 					for i, kingMove := range kingMoves {
+// 						if move.file == kingMove.file && move.rank == kingMove.rank {
+// 							kingMoves[i].highlighted = true
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
 
-	attackedSpotsCount := 0
-	for _, m := range kingMoves {
-		if m.highlighted || b.grid[m.file][m.rank].containsPiece {
-			attackedSpotsCount++
-		}
-	}
+// 	attackedSpotsCount := 0
+// 	for _, m := range kingMoves {
+// 		if m.highlighted || b.grid[m.file][m.rank].containsPiece {
+// 			attackedSpotsCount++
+// 		}
+// 	}
 
-	if attackedSpotsCount == len(kingMoves) {
-		return true
-	}
+// 	if attackedSpotsCount == len(kingMoves) {
+// 		return true
+// 	}
 
-	return false
-}
-
-func remove(s []Spot, i int) []Spot {
-	s[len(s)-1], s[i] = s[i], s[len(s)-1]
-	return s[:len(s)-1]
-}
+// 	return false
+// }
 
 // ToString returns the board's current state as a single string
 func (b *Board) ToString() string {
