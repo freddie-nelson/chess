@@ -366,24 +366,31 @@ func (b *Board) ToString() string {
 	resetColor := "\033[0m"
 
 	// square bg colors
-	darkSquareColor := "\033[100m"
-	lightSquareColor := "\033[47m"
-	selectedSquareColor := "\033[41m"
-	pickedSquareColor := "\033[42m"
-	highlightedSquareColor := "\033[43m"
+	lightSquareColor := "\033[48;2;240;217;181m"
+	darkSquareColor := "\033[48;2;181;136;99m"
+	selectedLightSquareColor := "\033[48;2;205;210;106m"
+	selectedDarkSquareColor := "\033[48;2;170;162;58m"
+	highlightedLightSquareColor := "\033[48;2;183;176;170m"
+	highlightedDarkSquareColor := "\033[48;2;138;114;107m"
+	pickedLightSquareColor := "\033[48;2;109;159;88m"
+	pickedDarkSquareColor := "\033[48;2;85;126;56m"
 
 	// piece colors
-	blackPieceColor := "\033[30m"
-	whitePieceColor := "\033[37;1m"
+	blackPieceColor := "\033[38;2;0;0;0m"
+	whitePieceColor := "\033[38;2;255;255;255m"
+
+	// grid coords colors
+	darkCoordColor := "\033[38;2;240;217;181m"
+	lightCoordColor := "\033[38;2;181;136;99m"
 
 	// characters
 	gapChar := " "
 
-	pieceLine := 2
-	spotSize := 11
+	pieceLine := 1
+	spotSize := 7
 
 	for rank := 0; rank < Size; rank++ {
-		lines := [5]string{}
+		lines := [3]string{}
 
 		for file := 0; file < Size; file++ {
 			// select colour for checkered pattern
@@ -394,11 +401,23 @@ func (b *Board) ToString() string {
 
 			spot := b.grid[file][rank]
 			if spot.picked {
-				bgColor = pickedSquareColor
+				if bgColor == darkSquareColor {
+					bgColor = pickedDarkSquareColor
+				} else {
+					bgColor = pickedLightSquareColor
+				}
 			} else if spot.selected {
-				bgColor = selectedSquareColor
+				if bgColor == darkSquareColor {
+					bgColor = selectedDarkSquareColor
+				} else {
+					bgColor = selectedLightSquareColor
+				}
 			} else if spot.highlighted {
-				bgColor = highlightedSquareColor
+				if bgColor == darkSquareColor {
+					bgColor = highlightedDarkSquareColor
+				} else {
+					bgColor = highlightedLightSquareColor
+				}
 			}
 
 			gap := bgColor + strings.Repeat(gapChar, spotSize) + resetColor
@@ -422,10 +441,27 @@ func (b *Board) ToString() string {
 
 					line := fmt.Sprintf("%s%s%s%s", margin, spotStr, margin, resetColor)
 					lines[i] += line
-					continue
-				}
+				} else if i == 0 && file == 0 {
+					textColor := ""
+					if bgColor == darkSquareColor {
+						textColor = darkCoordColor
+					} else {
+						textColor = lightCoordColor
+					}
 
-				lines[i] += gap
+					lines[i] += bgColor + textColor + fmt.Sprint(Size-rank) + strings.Repeat(gapChar, spotSize-1) + resetColor
+				} else if i == len(lines)-1 && rank == Size-1 {
+					textColor := ""
+					if bgColor == darkSquareColor {
+						textColor = darkCoordColor
+					} else {
+						textColor = lightCoordColor
+					}
+
+					lines[i] += bgColor + strings.Repeat(gapChar, spotSize-1) + textColor + string(rune(file+97)) + resetColor
+				} else {
+					lines[i] += gap
+				}
 			}
 
 		}

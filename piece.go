@@ -17,7 +17,8 @@ const (
 )
 
 // PieceStrings an array containing the string values for outputting pieces to the screen
-var PieceStrings []string = []string{"Q", "K", "R", "B", "N", "P"}
+// var PieceStrings []string = []string{"Q", "K", "R", "B", "N", "P"}
+var PieceStrings []string = []string{"♛", "♚", "♜", "♝", "♞", "♙"}
 
 // Piece : generic class for a chess piece
 type Piece struct {
