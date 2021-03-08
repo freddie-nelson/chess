@@ -17,6 +17,8 @@ func main() {
 	board := Board{}
 	board.Setup()
 	GameState.board = &board
+	GameState.color = White
+	GameState.opponentColor = Black
 
 	boardLevel := SetupBoardLevel()
 	screen.SetLevel(boardLevel)

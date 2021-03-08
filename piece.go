@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 // Enum type of piece
 const (
 	Queen int = iota
@@ -60,7 +56,7 @@ func (p *Piece) SimulateMove(s *Spot, d *Spot) bool {
 // FindValidMoves finds and returns all the legal moves a piece can make from it's current position
 // returns array of all valid moves parallel to the board array
 // and a boolean which represents if the piece is currently attacking the king
-func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponentColor int) ([]Spot, bool) {
+func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponentColor int, pruneChecks bool) ([]Spot, bool) {
 	validMoves := make([]Spot, 0)
 
 	// bishop offsets
@@ -87,15 +83,6 @@ func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponent
 		checksKing = calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, Size, true, opponentColor)
 	case King:
 		checksKing = calculateMovesFromOffsets(b, &validMoves, file, rank, queenOffs, queenOffs, 1, true, opponentColor)
-
-		// remove moves that cause king to be put in check
-		for i := len(validMoves) - 1; i >= 0; i-- {
-			if p.SimulateMove(&b[file][rank], &validMoves[i]) {
-				// remove move
-				validMoves = append(validMoves[:i], validMoves[i+1:]...)
-			}
-		}
-		fmt.Print(len(validMoves))
 	case Rook:
 		checksKing = calculateMovesFromOffsets(b, &validMoves, file, rank, rookXOffs, rookYOffs, Size, true, opponentColor)
 		if checksKing {
@@ -116,6 +103,14 @@ func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponent
 		}
 
 		checksKing = checkIfPawnCanTake(b, &validMoves, file, rank, opponentColor)
+	}
+
+	// remove moves that cause king to be put in check
+	for i := len(validMoves) - 1; i >= 0 && pruneChecks; i-- {
+		if p.SimulateMove(&b[file][rank], &validMoves[i]) {
+			// remove move
+			validMoves = append(validMoves[:i], validMoves[i+1:]...)
+		}
 	}
 
 	return validMoves, checksKing

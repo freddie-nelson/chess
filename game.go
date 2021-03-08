@@ -12,6 +12,7 @@ type Game struct {
 	opponentColor int
 	board         *Board
 	ended         bool
+	endState      string
 	turn          int
 	halfmoves     int
 	fullmoves     int
