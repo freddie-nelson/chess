@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	tl "github.com/JoelOtter/termloop"
 )
@@ -13,12 +14,22 @@ type BoardEntity struct {
 
 // Draw draws the boards current state to the console
 func (b *BoardEntity) Draw(s *tl.Screen) {
+	// print board
 	output := GameState.board.ToString()
-	fmt.Printf("\033[0;0H%s game ended: %v", output, GameState.ended)
+	fmt.Printf("\033[0;0H%s", output)
 }
 
 // Tick reacts to changes in the game's state every tick
 func (b *BoardEntity) Tick(e tl.Event) {
+	// calculate deltaTime
+	now := int(time.Now().UnixNano() / 1000000)
+	if GameState.timeOfLastTick == 0 {
+		GameState.timeOfLastTick = now
+	}
+
+	// deltaTime := now - GameState.timeOfLastTick
+	GameState.timeOfLastTick = now
+
 	board := GameState.board
 
 	if e.Type == tl.EventKey {
@@ -35,14 +46,15 @@ func (b *BoardEntity) Tick(e tl.Event) {
 			board.PickSpot()
 		}
 	}
+
+	// if GameState.turn == GameState.color {
+	// 	GameState.time -= deltaTime
+	// }
 }
 
 // SetupBoardLevel sets up the board level and returns it
 func SetupBoardLevel() *tl.BaseLevel {
-	level := tl.NewBaseLevel(tl.Cell{
-		Bg: tl.ColorBlack,
-		Fg: tl.ColorWhite,
-	})
+	level := tl.NewBaseLevel(tl.Cell{})
 
 	level.AddEntity(&BoardEntity{tl.NewEntity(0, 0, 0, 0)})
 

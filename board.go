@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -363,6 +364,7 @@ func (b *Board) GetKingSpot(color int) *Spot {
 func (b *Board) ToString() string {
 	output := ""
 
+	// set bg back to default
 	resetColor := "\033[0m"
 
 	// square bg colors
@@ -387,10 +389,11 @@ func (b *Board) ToString() string {
 	gapChar := " "
 
 	pieceLine := 1
-	spotSize := 7
+	const spotCols int = 7
+	const spotRows int = 3
 
 	for rank := 0; rank < Size; rank++ {
-		lines := [3]string{}
+		lines := [spotRows]string{}
 
 		for file := 0; file < Size; file++ {
 			// select colour for checkered pattern
@@ -420,11 +423,11 @@ func (b *Board) ToString() string {
 				}
 			}
 
-			gap := bgColor + strings.Repeat(gapChar, spotSize) + resetColor
+			gap := bgColor + strings.Repeat(gapChar, spotCols) + resetColor
 
 			for i := 0; i < len(lines); i++ {
 				if i == pieceLine {
-					margin := bgColor + strings.Repeat(gapChar, spotSize/2)
+					margin := bgColor + strings.Repeat(gapChar, spotCols/2)
 					spotStr := " "
 
 					if spot.containsPiece {
@@ -449,7 +452,7 @@ func (b *Board) ToString() string {
 						textColor = lightCoordColor
 					}
 
-					lines[i] += bgColor + textColor + fmt.Sprint(Size-rank) + strings.Repeat(gapChar, spotSize-1) + resetColor
+					lines[i] += bgColor + textColor + fmt.Sprint(Size-rank) + strings.Repeat(gapChar, spotCols-1) + resetColor
 				} else if i == len(lines)-1 && rank == Size-1 {
 					textColor := ""
 					if bgColor == darkSquareColor {
@@ -458,7 +461,7 @@ func (b *Board) ToString() string {
 						textColor = lightCoordColor
 					}
 
-					lines[i] += bgColor + strings.Repeat(gapChar, spotSize-1) + textColor + string(rune(file+97)) + resetColor
+					lines[i] += bgColor + strings.Repeat(gapChar, spotCols-1) + textColor + string(rune(file+97)) + resetColor
 				} else {
 					lines[i] += gap
 				}
@@ -472,5 +475,45 @@ func (b *Board) ToString() string {
 		}
 	}
 
+	// add timers
+	top := b.createTimerString(GameState.opponentTime, false, spotCols, spotRows, resetColor)
+	bottom := b.createTimerString(GameState.time, true, spotCols, spotRows, resetColor)
+
+	output += top + bottom
+
 	return output
+}
+
+func (b *Board) createTimerString(timerMs int, bottom bool, spotCols int, spotRows int, resetColor string) string {
+	timer := ""
+	timerCols := 10
+	timerLines := 3
+	timeLine := 1
+	timerBgColor := "\033[48;2;0;0;0m"
+	timerTextColor := "\033[38;2;255;255;255m"
+
+	line := 0
+
+	for i := 0; i < timerLines; i++ {
+		line++
+		if bottom {
+			line = (spotRows * Size) - i
+		}
+
+		if i == timeLine {
+			t, _ := time.ParseDuration(fmt.Sprintf("%vms", timerMs))
+			mins := int(t.Minutes())
+			secs := int(t.Seconds()) - mins*60
+			ms := int(t.Milliseconds()) - (mins * 60 * 1000) - (secs * 1000)
+
+			timeString := fmt.Sprintf("%v:%02v.%v", mins, secs, string(fmt.Sprint(ms)[0]))
+			gapCount := timerCols - len(timeString) - 1
+
+			timer += fmt.Sprintf("\033[%v;%vH%s%s%s%s %s", line, (spotCols*Size)+1, timerBgColor, timerTextColor, strings.Repeat(" ", gapCount), timeString, resetColor)
+		} else {
+			timer += fmt.Sprintf("\033[%v;%vH%s%s%s%s", line, (spotCols*Size)+1, timerBgColor, timerTextColor, strings.Repeat(" ", timerCols), resetColor)
+		}
+	}
+
+	return timer
 }
