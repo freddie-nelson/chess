@@ -16,10 +16,12 @@ type Game struct {
 	turn          int
 	halfmoves     int
 	fullmoves     int
-	time          int
-	opponentTime  int
+
 	whiteCastling *CastlingRights
 	blackCastling *CastlingRights
+
+	you      *User
+	opponent *User
 
 	timeOfLastTick int
 	deltaTime      int

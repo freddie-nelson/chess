@@ -19,8 +19,10 @@ func main() {
 	GameState.board = &board
 	GameState.color = White
 	GameState.opponentColor = Black
-	GameState.time = 600000
-	GameState.opponentTime = 600000
+
+	// setup users temp
+	GameState.you = &User{"Freddie", 600000, false}
+	GameState.opponent = &User{"GM Hikaru", 600000, true}
 
 	boardLevel := SetupBoardLevel()
 	screen.SetLevel(boardLevel)

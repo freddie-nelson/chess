@@ -476,12 +476,44 @@ func (b *Board) ToString() string {
 	}
 
 	// add timers
-	top := b.createTimerString(GameState.opponentTime, false, spotCols, spotRows, resetColor)
-	bottom := b.createTimerString(GameState.time, true, spotCols, spotRows, resetColor)
+	opponentTimer := b.createTimerString(GameState.opponent.time, false, spotCols, spotRows, resetColor)
+	playerTimer := b.createTimerString(GameState.you.time, true, spotCols, spotRows, resetColor)
 
-	output += top + bottom
+	// add user bands
+	opponentBand := b.createUserBandString(GameState.opponent, false, spotCols, spotRows, resetColor)
+	playerBand := b.createUserBandString(GameState.you, true, spotCols, spotRows, resetColor)
+
+	output += opponentBand + opponentTimer + playerBand + playerTimer
 
 	return output
+}
+
+func (b *Board) createUserBandString(user *User, bottom bool, spotCols int, spotRows int, resetColor string) string {
+	band := ""
+	cols := (spotCols * Size)
+	lines := 3
+	textLine := 1
+	bgColor := "\033[48;2;0;0;0m"
+	textColor := "\033[38;2;255;255;255m"
+
+	line := 0
+
+	for i := 0; i < lines; i++ {
+		line++
+		if bottom {
+			line = (spotRows * Size) + lines - i + 3
+		}
+
+		if i == textLine {
+			gapCount := cols - len(user.name) - 1
+
+			band += fmt.Sprintf("\033[%v;%vH%s%s %s%s%s", line, 0, bgColor, textColor, user.name, strings.Repeat(" ", gapCount), resetColor)
+		} else {
+			band += fmt.Sprintf("\033[%v;%vH%s%s%s%s", line, 0, bgColor, textColor, strings.Repeat(" ", cols), resetColor)
+		}
+	}
+
+	return band
 }
 
 func (b *Board) createTimerString(timerMs int, bottom bool, spotCols int, spotRows int, resetColor string) string {
