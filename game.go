@@ -22,4 +22,5 @@ type Game struct {
 	blackCastling *CastlingRights
 
 	timeOfLastTick int
+	deltaTime      int
 }

@@ -16,7 +16,7 @@ type BoardEntity struct {
 func (b *BoardEntity) Draw(s *tl.Screen) {
 	// print board
 	output := GameState.board.ToString()
-	fmt.Printf("\033[0;0H%s", output)
+	fmt.Printf("\033[4;0H%s", output)
 }
 
 // Tick reacts to changes in the game's state every tick
@@ -27,7 +27,7 @@ func (b *BoardEntity) Tick(e tl.Event) {
 		GameState.timeOfLastTick = now
 	}
 
-	// deltaTime := now - GameState.timeOfLastTick
+	GameState.deltaTime = now - GameState.timeOfLastTick
 	GameState.timeOfLastTick = now
 
 	board := GameState.board

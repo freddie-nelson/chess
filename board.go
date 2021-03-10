@@ -497,7 +497,7 @@ func (b *Board) createTimerString(timerMs int, bottom bool, spotCols int, spotRo
 	for i := 0; i < timerLines; i++ {
 		line++
 		if bottom {
-			line = (spotRows * Size) - i
+			line = (spotRows * Size) + timerLines - i + 3
 		}
 
 		if i == timeLine {
@@ -509,9 +509,9 @@ func (b *Board) createTimerString(timerMs int, bottom bool, spotCols int, spotRo
 			timeString := fmt.Sprintf("%v:%02v.%v", mins, secs, string(fmt.Sprint(ms)[0]))
 			gapCount := timerCols - len(timeString) - 1
 
-			timer += fmt.Sprintf("\033[%v;%vH%s%s%s%s %s", line, (spotCols*Size)+1, timerBgColor, timerTextColor, strings.Repeat(" ", gapCount), timeString, resetColor)
+			timer += fmt.Sprintf("\033[%v;%vH%s%s%s%s %s", line, (spotCols*Size)-timerCols+1, timerBgColor, timerTextColor, strings.Repeat(" ", gapCount), timeString, resetColor)
 		} else {
-			timer += fmt.Sprintf("\033[%v;%vH%s%s%s%s", line, (spotCols*Size)+1, timerBgColor, timerTextColor, strings.Repeat(" ", timerCols), resetColor)
+			timer += fmt.Sprintf("\033[%v;%vH%s%s%s%s", line, (spotCols*Size)-timerCols+1, timerBgColor, timerTextColor, strings.Repeat(" ", timerCols), resetColor)
 		}
 	}
 
