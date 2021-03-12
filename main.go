@@ -24,8 +24,8 @@ func main() {
 	GameState.you = &User{"Freddie", 600000, false}
 	GameState.opponent = &User{"GM Hikaru", 600000, true}
 
-	boardLevel := SetupBoardLevel()
-	screen.SetLevel(boardLevel)
+	mainMenuLevel := SetupMainMenuLevel()
+	screen.SetLevel(mainMenuLevel)
 
 	screen.SetFps(24)
 
