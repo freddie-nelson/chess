@@ -30,7 +30,7 @@ type Piece struct {
 // SimulateMove simualates a move on a clone of the current board
 // returns if the king (of the piece's color) is in check in the new board state
 func (p *Piece) SimulateMove(s *Spot, d *Spot) bool {
-	simulatedBoard := *GameState.board.grid
+	simulatedBoard := *Game.board.grid
 
 	start := &simulatedBoard[s.file][s.rank]
 	destination := &simulatedBoard[d.file][d.rank]
@@ -47,7 +47,7 @@ func (p *Piece) SimulateMove(s *Spot, d *Spot) bool {
 		opponentColor = White
 	}
 
-	if GameState.board.IsKingInCheck(piece.color, opponentColor, &simulatedBoard) {
+	if Game.board.IsKingInCheck(piece.color, opponentColor, &simulatedBoard) {
 		return true
 	}
 
@@ -75,7 +75,7 @@ func (p *Piece) FindValidMoves(b *[Size][Size]Spot, file int, rank int, opponent
 	knightXOffs := []int{2, -2}
 	knightYOffs := []int{1, -1}
 
-	GameState.board.ClearHighlighted()
+	Game.board.ClearHighlighted()
 
 	checksKing := false
 
@@ -130,7 +130,7 @@ func calculateMovesFromOffsets(b *[Size][Size]Spot, validMoves *[]Spot, file int
 			for i := 1; i < Size && i <= stopAfter; i++ {
 				currentFile := file + xOff*i
 				currentRank := rank + yOff*i
-				if GameState.board.IsSpotOffBoard(currentFile, currentRank) {
+				if Game.board.IsSpotOffBoard(currentFile, currentRank) {
 					break
 				}
 
@@ -179,7 +179,7 @@ func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[]Spot, file int, rank 
 	checksKing := false
 
 	// left file
-	if !GameState.board.IsSpotOffBoard(lFile, nextRank) {
+	if !Game.board.IsSpotOffBoard(lFile, nextRank) {
 
 		// can pawn take diagonally
 		if b[lFile][nextRank].containsPiece && b[lFile][nextRank].piece.color == opponentColor {
@@ -194,7 +194,7 @@ func checkIfPawnCanTake(b *[Size][Size]Spot, validMoves *[]Spot, file int, rank 
 	}
 
 	// right file
-	if !GameState.board.IsSpotOffBoard(rFile, nextRank) {
+	if !Game.board.IsSpotOffBoard(rFile, nextRank) {
 
 		// can pawn take diagonally
 		if b[rFile][nextRank].containsPiece && b[rFile][nextRank].piece.color == opponentColor {

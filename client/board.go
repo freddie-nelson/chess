@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-// Board stores details about the boards state
+// Board handles game logic about the board and drawing board to console
 type Board struct {
 	grid         *[Size][Size]Spot
 	selectedSpot *Spot
@@ -43,27 +43,27 @@ func (b *Board) GenerateFromFENString(fen string) {
 
 	// current turn
 	if fields[0] == "b" {
-		GameState.turn = Black
+		Game.turn = Black
 	} else {
-		GameState.turn = White
+		Game.turn = White
 	}
 
 	// castling rights
-	GameState.blackCastling = &CastlingRights{false, false}
-	GameState.whiteCastling = &CastlingRights{false, false}
+	Game.blackCastling = &CastlingRights{false, false}
+	Game.whiteCastling = &CastlingRights{false, false}
 
 	for _, rights := range fields[1] {
 		if unicode.IsLower(rights) {
 			if rights == 'k' {
-				GameState.blackCastling.kingside = true
+				Game.blackCastling.kingside = true
 			} else {
-				GameState.blackCastling.queenside = true
+				Game.blackCastling.queenside = true
 			}
 		} else {
 			if rights == 'K' {
-				GameState.whiteCastling.kingside = true
+				Game.whiteCastling.kingside = true
 			} else {
-				GameState.whiteCastling.queenside = true
+				Game.whiteCastling.queenside = true
 			}
 		}
 	}
@@ -75,8 +75,8 @@ func (b *Board) GenerateFromFENString(fen string) {
 	}
 
 	// fullmoves and halfmoves
-	GameState.halfmoves = int(fields[3][0] - '0')
-	GameState.fullmoves = int(fields[4][0] - '0')
+	Game.halfmoves = int(fields[3][0] - '0')
+	Game.fullmoves = int(fields[4][0] - '0')
 
 	// place pieces
 	for rank, fenRank := range piecePlacements {
@@ -167,7 +167,7 @@ func (b *Board) ChangeSelectedSpot(fileOff int, rankOff int) {
 // PickSpot picks the current selected spot
 func (b *Board) PickSpot() {
 	// prevent player from picking spots that don't contain a piece
-	if ((!b.selectedSpot.containsPiece || b.selectedSpot.piece.color != GameState.color) && !b.selectedSpot.highlighted) || GameState.turn != GameState.color {
+	if ((!b.selectedSpot.containsPiece || b.selectedSpot.piece.color != Game.color) && !b.selectedSpot.highlighted) || Game.turn != Game.color {
 		if !b.selectedSpot.containsPiece {
 			if b.pickedSpot != nil {
 				b.pickedSpot.picked = false
@@ -238,11 +238,11 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 
 	// if move puts player's king in check then revert the move
 	opponentColor := Black
-	if GameState.turn == Black {
+	if Game.turn == Black {
 		opponentColor = White
 	}
 
-	if b.IsKingInCheck(GameState.turn, opponentColor, nil) {
+	if b.IsKingInCheck(Game.turn, opponentColor, nil) {
 		piece.moves--
 
 		start.piece = piece
@@ -262,7 +262,7 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 
 	// if turn was successfully played then pass turn to opponent
 	if turnSuccessful {
-		GameState.NextTurn(GameState.turn, opponentColor)
+		Game.NextTurn(Game.turn, opponentColor)
 	}
 
 	// clear highlighted possible moves once piece has moved
@@ -452,12 +452,12 @@ func (b *Board) ToString() string {
 	}
 
 	// add timers
-	opponentTimer := b.createTimerString(GameState.opponent.time, false, spotCols, spotRows, resetColor)
-	playerTimer := b.createTimerString(GameState.you.time, true, spotCols, spotRows, resetColor)
+	opponentTimer := b.createTimerString(Game.opponent.time, false, spotCols, spotRows, resetColor)
+	playerTimer := b.createTimerString(Game.you.time, true, spotCols, spotRows, resetColor)
 
 	// add user bands
-	opponentBand := b.createUserBandString(GameState.opponent, false, spotCols, spotRows, resetColor)
-	playerBand := b.createUserBandString(GameState.you, true, spotCols, spotRows, resetColor)
+	opponentBand := b.createUserBandString(Game.opponent, false, spotCols, spotRows, resetColor)
+	playerBand := b.createUserBandString(Game.you, true, spotCols, spotRows, resetColor)
 
 	output += opponentBand + opponentTimer + playerBand + playerTimer
 

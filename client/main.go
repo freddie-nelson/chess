@@ -7,8 +7,8 @@ import (
 // Size is the width and height of the board
 const Size int = 8
 
-// GameState global game state
-var GameState Game
+// Game global game state
+var Game GameController
 
 func main() {
 	game := tl.NewGame()
@@ -16,13 +16,13 @@ func main() {
 
 	board := Board{}
 	board.Setup()
-	GameState.board = &board
-	GameState.color = White
-	GameState.opponentColor = Black
+	Game.board = &board
+	Game.color = White
+	Game.opponentColor = Black
 
 	// setup users temp
-	GameState.you = &User{"Freddie", 600000, false}
-	GameState.opponent = &User{"GM Hikaru", 600000, true}
+	Game.you = &User{"Freddie", 600000, false}
+	Game.opponent = &User{"GM Hikaru", 600000, true}
 
 	mainMenuLevel := SetupMainMenuLevel()
 	screen.SetLevel(mainMenuLevel)

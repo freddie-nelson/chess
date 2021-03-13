@@ -15,7 +15,7 @@ type GameListener struct {
 // Draw draws the boards current state to the console
 func (b *GameListener) Draw(s *tl.Screen) {
 	// print board
-	output := GameState.board.ToString()
+	output := Game.board.ToString()
 	fmt.Printf("\033[4;0H%s", output)
 }
 
@@ -23,14 +23,14 @@ func (b *GameListener) Draw(s *tl.Screen) {
 func (b *GameListener) Tick(e tl.Event) {
 	// calculate deltaTime
 	now := int(time.Now().UnixNano() / 1000000)
-	if GameState.timeOfLastTick == 0 {
-		GameState.timeOfLastTick = now
+	if Game.timeOfLastTick == 0 {
+		Game.timeOfLastTick = now
 	}
 
-	GameState.deltaTime = now - GameState.timeOfLastTick
-	GameState.timeOfLastTick = now
+	Game.deltaTime = now - Game.timeOfLastTick
+	Game.timeOfLastTick = now
 
-	board := GameState.board
+	board := Game.board
 
 	if e.Type == tl.EventKey {
 		switch e.Key {
@@ -47,8 +47,8 @@ func (b *GameListener) Tick(e tl.Event) {
 		}
 	}
 
-	// if GameState.turn == GameState.color {
-	// 	GameState.time -= deltaTime
+	// if Game.turn == Game.color {
+	// 	Game.time -= deltaTime
 	// }
 }
 

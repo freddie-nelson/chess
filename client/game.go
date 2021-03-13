@@ -6,8 +6,8 @@ type CastlingRights struct {
 	kingside  bool
 }
 
-// Game stores values about the games current state
-type Game struct {
+// GameController controls top level game logic and handles server connections
+type GameController struct {
 	color         int
 	opponentColor int
 	board         *Board
@@ -27,27 +27,27 @@ type Game struct {
 	deltaTime      int
 }
 
-func (g *Game) NextTurn(color int, opponentColor int) {
+func (g *GameController) NextTurn(color int, opponentColor int) {
 	// check for winning conditions
 	if g.board.IsStalemate(opponentColor, color) {
-		GameState.ended = true
+		Game.ended = true
 
 		if g.board.IsKingInCheck(opponentColor, color, nil) {
-			GameState.endState = "checkmate"
+			Game.endState = "checkmate"
 		} else {
-			GameState.endState = "stalemate"
+			Game.endState = "stalemate"
 		}
 	}
 
-	GameState.halfmoves++
-	if GameState.turn == Black {
-		GameState.fullmoves++
-		GameState.turn = White
+	Game.halfmoves++
+	if Game.turn == Black {
+		Game.fullmoves++
+		Game.turn = White
 	} else {
-		GameState.turn = Black
+		Game.turn = Black
 	}
 
-	if GameState.fullmoves == 50 {
-		GameState.ended = true
+	if Game.fullmoves == 50 {
+		Game.ended = true
 	}
 }
