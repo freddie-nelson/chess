@@ -241,6 +241,7 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 	if GameState.turn == Black {
 		opponentColor = White
 	}
+
 	if b.IsKingInCheck(GameState.turn, opponentColor, nil) {
 		piece.moves--
 
@@ -261,36 +262,11 @@ func (b *Board) MovePiece(start *Spot, destination *Spot) {
 
 	// if turn was successfully played then pass turn to opponent
 	if turnSuccessful {
-		b.nextTurn(GameState.turn, opponentColor)
+		GameState.NextTurn(GameState.turn, opponentColor)
 	}
 
 	// clear highlighted possible moves once piece has moved
 	b.ClearHighlighted()
-}
-
-func (b *Board) nextTurn(color int, opponentColor int) {
-	// check for winning conditions
-	if b.IsStalemate(opponentColor, color) {
-		GameState.ended = true
-
-		if b.IsKingInCheck(opponentColor, color, nil) {
-			GameState.endState = "checkmate"
-		} else {
-			GameState.endState = "stalemate"
-		}
-	}
-
-	GameState.halfmoves++
-	if GameState.turn == Black {
-		GameState.fullmoves++
-		GameState.turn = White
-	} else {
-		GameState.turn = Black
-	}
-
-	if GameState.fullmoves == 50 {
-		GameState.ended = true
-	}
 }
 
 // IsKingInCheck goes through each opponent piece on the board and checks if they are attacking

@@ -28,7 +28,7 @@ type Piece struct {
 }
 
 // SimulateMove simualates a move on a clone of the current board
-// returns if the king is in check in the new board state
+// returns if the king (of the piece's color) is in check in the new board state
 func (p *Piece) SimulateMove(s *Spot, d *Spot) bool {
 	simulatedBoard := *GameState.board.grid
 
