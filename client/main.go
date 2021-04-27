@@ -7,7 +7,13 @@ import (
 // Size is the width and height of the board
 const Size int = 8
 
-// Game global game state
+// TerminalWidth width of terminal in characters
+var TerminalWidth int = 10
+
+// TerminalHeight number of rows in terminal
+var TerminalHeight int = 10
+
+// Game global game controller
 var Game GameController
 
 func main() {

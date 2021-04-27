@@ -27,6 +27,7 @@ type GameController struct {
 	deltaTime      int
 }
 
+// NextTurn performs end game state checks and if game does not end then proceeds to next turn
 func (g *GameController) NextTurn(color int, opponentColor int) {
 	// check for winning conditions
 	if g.board.IsStalemate(opponentColor, color) {

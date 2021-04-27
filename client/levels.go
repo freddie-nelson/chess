@@ -7,6 +7,19 @@ import (
 	tl "github.com/JoelOtter/termloop"
 )
 
+// ResizeListener updates terminal width and height every frame
+type ResizeListener struct {
+	*tl.Entity
+}
+
+func (r *ResizeListener) Draw(s *tl.Screen) {
+	w, h := s.Size()
+	TerminalWidth = w
+	TerminalHeight = h
+
+	// fmt.Printf("w: %v, h: %v", w, h)
+}
+
 // BoardEntity represents the board in the game space
 type GameListener struct {
 	*tl.Entity
@@ -55,7 +68,7 @@ func (b *GameListener) Tick(e tl.Event) {
 // SetupGameLevel sets up the game level and returns it
 func SetupGameLevel() *tl.BaseLevel {
 	level := tl.NewBaseLevel(tl.Cell{})
-
+	level.AddEntity(&ResizeListener{tl.NewEntity(0, 0, 0, 0)})
 	level.AddEntity(&GameListener{tl.NewEntity(0, 0, 0, 0)})
 
 	return level
@@ -91,6 +104,13 @@ func (ml *MenuListener) Tick(e tl.Event) {
 			if ml.currentBtn == 0 {
 				ml.currentBtn = 1
 			}
+		case tl.KeyEnter:
+			switch ml.currentBtn {
+			case 1:
+				// TODO write create game function
+			case 2:
+				// TODO write join game function
+			}
 		}
 
 		// highlight button
@@ -113,6 +133,7 @@ func addButton(l *tl.BaseLevel, ml *MenuListener, text string, x int, y int, wid
 // SetupMainMenuLevel sets up the main level and returns it
 func SetupMainMenuLevel() *tl.BaseLevel {
 	level := tl.NewBaseLevel(tl.Cell{Fg: tl.ColorBlack, Bg: tl.ColorBlack, Ch: ' '})
+	level.AddEntity(&ResizeListener{tl.NewEntity(0, 0, 0, 0)})
 
 	// add listener
 	ml := &MenuListener{tl.NewEntity(0, 0, 0, 0), make([]*tl.Rectangle, 0), make([]*tl.Text, 0), 0}
